@@ -16,9 +16,11 @@
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #include <Update.h>
+
 const char* host = "esp32";
 const char* ssid = "NES";
 const char* password = "segavita90";
+unsigned long time_now = 0;
 WebServer server(80);
 
 /*
@@ -56,7 +58,7 @@ const char* loginIndex =
 "<script>"
     "function check(form)"
     "{"
-    "if(form.userid.value=='admin' && form.pwd.value=='segavita90')"
+    "if(form.userid.value=='admin' && form.pwd.value=='admin')"
     "{"
     "window.open('/serverIndex')"
     "}"
@@ -120,6 +122,8 @@ const char* serverIndex =
 #define TRIG1 12
 #define ECHO2 26
 #define TRIG2 25
+//#define ECHO3 26
+//#define TRIG3 25
 DMXESPSerial dmx;
 
 int Delay=10;
@@ -139,20 +143,32 @@ void setup() {
   pinMode(ECHO1, INPUT); 
   pinMode(TRIG2, OUTPUT); 
   pinMode(ECHO2, INPUT); 
-  delay(3000);
+//  pinMode(TRIG3, OUTPUT); 
+//  pinMode(ECHO3, INPUT); 
+  delay2(3000);
 
   Serial.println("starting...");
 
   dmx.init(24, 4);           // initialization for complete bus
 
   Serial.println("initialized...");
-  delay(200);               // wait a while (not necessary)
+  delay2(200);               // wait a while (not necessary)
   for (int i = 0; i < 24; i++)
     {
       dmx.write(i, 0);
     }
   dmx.update();  
-  delay(2000); 
+  dmx.write(1, 254);
+  dmx.update();
+  delay2(200);
+  dmx.write(1, 0);
+  dmx.update();
+  delay2(200);
+  dmx.write(1, 254);
+  dmx.update();
+  delay2(200);
+  dmx.write(1, 0);
+  dmx.update();
   //OTA/////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Connect to WiFi network
@@ -161,7 +177,7 @@ void setup() {
 
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+    delay2(500);
     Serial.print(".");
   }
   Serial.println("");
@@ -174,7 +190,7 @@ void setup() {
   if (!MDNS.begin(host)) { //http://esp32.local
     Serial.println("Error setting up MDNS responder!");
     while (1) {
-      delay(1000);
+      delay2(1000);
     }
   }
   Serial.println("mDNS responder started");
@@ -220,36 +236,38 @@ void loop() {
   ///OTA///////////////////
   ///////////////////////////////////////////////////////////////////////////////////////
   server.handleClient();
-  delay(1);
+
+
   //other
   int d1=ultr(ECHO1,TRIG1);
   int d2=ultr(ECHO2,TRIG2);
-
+  //int d3=ultr(ECHO3,TRIG3);
   if(d1<=max_distance){
     Serial.print("D1: ");
     Serial.println(d1);  
-    FC(3,1);
+    FC(1,3);
   }
   if(d2<=max_distance){
     Serial.print("D2: ");
     Serial.println(d2);  
-    FC_double(3,3,2,1);
+    FC_double(3,3,2,1); //Start1Up_shorter,End1Up,Start2Down_longer,End2Down
   }  
-
-
-//  FC(1,3);
-//  
-//  delay(delay_between);
-//  Serial.println("after 13");
-//  FC(3,2);
-//  FC_double(3,3,2,1);
-//  delay(delay_between);
-//  Serial.println("after 32");
+//  if(d3<=max_distance){
+//    Serial.print("D1: ");
+//    Serial.println(d1);  
+//    FC(3,1);
+//  }
+//  /Serial.println("test5");
+  
 
 }
 
 
-
+void delay2(int x){
+  time_now = millis();
+  while(millis() < time_now + x){
+  }
+}
 void FC (int x, int y){ //Start,End
   if(x<y) {
     for (int i=x; i<=y;i++)
@@ -258,19 +276,27 @@ void FC (int x, int y){ //Start,End
       {
         dmx.write(i, v);
         dmx.update();
-        delay(Delay);
-    
+        delay2(Delay);
+      }
+      for (int v=100; v<=250; v++)
+      {
+        dmx.write(i, v);
+        dmx.update();
       }
     }
-    delay(delay_between);
+    delay2(delay_between);
     for (int i=x; i<=y;i++)
     {
+      for (int v=255; v>=100; v--)
+      {
+        dmx.write(i, v);
+        dmx.update();
+      }
       for (int v=max_bright; v>=0; v--)
       {
         dmx.write(i, v);
         dmx.update();
-        delay(Delay);
-    
+        delay2(Delay);
       }
     }
   }
@@ -281,18 +307,27 @@ void FC (int x, int y){ //Start,End
       {
         dmx.write(i, v);
         dmx.update();
-        delay(Delay);
-    
+        delay2(Delay);
+      }
+      for (int v=100; v<=255; v++)
+      {
+        dmx.write(i, v);
+        dmx.update();
       }
     }
-    delay(delay_between);
+    delay2(delay_between);
     for (int i=x; i>=y;i--)
     {
+      for (int v=255; v>=100; v--)
+      {
+        dmx.write(i, v);
+        dmx.update();
+      }
       for (int v=max_bright; v>=0; v--)
       {
         dmx.write(i, v);
         dmx.update();
-        delay(Delay);
+        delay2(Delay);
     
       }
     }
@@ -311,20 +346,34 @@ void FC_double (int S1, int E1,int S2,int E2)  //Start1Up_shorter,End1Up,Start2D
         dmx.write(i, v);
         if(j!=0) dmx.write(j,v);
         dmx.update();
-        delay(Delay);
+        delay2(Delay);
+      }
+      for (int v=100; v<=255; v++)
+      {
+        dmx.write(i, v);
+        if(j!=0) dmx.write(j,v);
+        dmx.update();
+        delay2(Delay);
       }
       if(j>=E1) j=0;else j++;
     }
-    delay(delay_between);
+    delay2(delay_between);
     j=S1;
     for (int i=S2; i>=E2;i--)
     {
+      for (int v=255; v>=100; v--)
+      {
+        dmx.write(i, v);
+        if(j!=0) dmx.write(j,v);
+        dmx.update();
+        delay2(Delay);
+      }
       for (int v=max_bright; v>=0; v--)
       {
         dmx.write(i, v);
         if(j!=0) dmx.write(j,v);
         dmx.update();
-        delay(Delay);
+        delay2(Delay);
       }
       if(j>=E1) j=0;else j++;
     }
