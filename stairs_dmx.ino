@@ -122,14 +122,18 @@ const char* serverIndex =
 #define TRIG1 12
 #define ECHO2 26
 #define TRIG2 25
-//#define ECHO3 26
-//#define TRIG3 25
+#define ECHO3 33
+#define TRIG3 32
+//#define ECHO4 21
+//#define TRIG4 19
+//#define ECHO5 23
+//#define TRIG5 22
 DMXESPSerial dmx;
 
-int Delay=10;
-int max_distance=30;
+int Delay=0;
+int max_distance=25;
 int delay_between=5000;
-int max_bright=100;
+int max_bright=250;
 
 void FC (int x, int y);
 void FC_double(int S1, int E1,int S2,int E2);
@@ -143,8 +147,8 @@ void setup() {
   pinMode(ECHO1, INPUT); 
   pinMode(TRIG2, OUTPUT); 
   pinMode(ECHO2, INPUT); 
-//  pinMode(TRIG3, OUTPUT); 
-//  pinMode(ECHO3, INPUT); 
+  pinMode(TRIG3, OUTPUT); 
+  pinMode(ECHO3, INPUT); 
   delay2(3000);
 
   Serial.println("starting...");
@@ -241,7 +245,7 @@ void loop() {
   //other
   int d1=ultr(ECHO1,TRIG1);
   int d2=ultr(ECHO2,TRIG2);
-  //int d3=ultr(ECHO3,TRIG3);
+  int d3=ultr(ECHO3,TRIG3);
   if(d1<=max_distance){
     Serial.print("D1: ");
     Serial.println(d1);  
@@ -252,11 +256,11 @@ void loop() {
     Serial.println(d2);  
     FC_double(3,3,2,1); //Start1Up_shorter,End1Up,Start2Down_longer,End2Down
   }  
-//  if(d3<=max_distance){
-//    Serial.print("D1: ");
-//    Serial.println(d1);  
-//    FC(3,1);
-//  }
+  if(d3<=max_distance){
+    Serial.print("D3: ");
+    Serial.println(d3);  
+    FC(3,1);
+  }
 //  /Serial.println("test5");
   
 
@@ -277,26 +281,18 @@ void FC (int x, int y){ //Start,End
         dmx.write(i, v);
         dmx.update();
         delay2(Delay);
-      }
-      for (int v=100; v<=250; v++)
-      {
-        dmx.write(i, v);
-        dmx.update();
+    
       }
     }
     delay2(delay_between);
     for (int i=x; i<=y;i++)
     {
-      for (int v=255; v>=100; v--)
-      {
-        dmx.write(i, v);
-        dmx.update();
-      }
       for (int v=max_bright; v>=0; v--)
       {
         dmx.write(i, v);
         dmx.update();
         delay2(Delay);
+    
       }
     }
   }
@@ -308,21 +304,12 @@ void FC (int x, int y){ //Start,End
         dmx.write(i, v);
         dmx.update();
         delay2(Delay);
-      }
-      for (int v=100; v<=255; v++)
-      {
-        dmx.write(i, v);
-        dmx.update();
+    
       }
     }
     delay2(delay_between);
     for (int i=x; i>=y;i--)
     {
-      for (int v=255; v>=100; v--)
-      {
-        dmx.write(i, v);
-        dmx.update();
-      }
       for (int v=max_bright; v>=0; v--)
       {
         dmx.write(i, v);
@@ -348,26 +335,12 @@ void FC_double (int S1, int E1,int S2,int E2)  //Start1Up_shorter,End1Up,Start2D
         dmx.update();
         delay2(Delay);
       }
-      for (int v=100; v<=255; v++)
-      {
-        dmx.write(i, v);
-        if(j!=0) dmx.write(j,v);
-        dmx.update();
-        delay2(Delay);
-      }
       if(j>=E1) j=0;else j++;
     }
     delay2(delay_between);
     j=S1;
     for (int i=S2; i>=E2;i--)
     {
-      for (int v=255; v>=100; v--)
-      {
-        dmx.write(i, v);
-        if(j!=0) dmx.write(j,v);
-        dmx.update();
-        delay2(Delay);
-      }
       for (int v=max_bright; v>=0; v--)
       {
         dmx.write(i, v);
@@ -380,10 +353,7 @@ void FC_double (int S1, int E1,int S2,int E2)  //Start1Up_shorter,End1Up,Start2D
   }
   else {
     Serial.print("error schody sie nie zgadzaja");
-    Serial.print(S1);
-    Serial.print(S2);
-    Serial.print(E1);
-    Serial.println(E2);
+
   }
 }
 
