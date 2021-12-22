@@ -162,17 +162,7 @@ void setup() {
       dmx.write(i, 0);
     }
   dmx.update();  
-  dmx.write(1, 254);
-  dmx.update();
-  delay2(200);
-  dmx.write(1, 0);
-  dmx.update();
-  delay2(200);
-  dmx.write(1, 254);
-  dmx.update();
-  delay2(200);
-  dmx.write(1, 0);
-  dmx.update();
+
   //OTA/////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Connect to WiFi network
@@ -233,6 +223,17 @@ void setup() {
     }
   });
   server.begin();
+  dmx.write(1, 254);
+  dmx.update();
+  delay2(200);
+  dmx.write(1, 0);
+  dmx.update();
+  delay2(200);
+  dmx.write(1, 254);
+  dmx.update();
+  delay2(200);
+  dmx.write(1, 0);
+  dmx.update();
 }
 
 
