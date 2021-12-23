@@ -131,9 +131,9 @@ const char* serverIndex =
 DMXESPSerial dmx;
 
 int Delay=0;
-int max_distance=25;
-int delay_between=5000;
-int max_bright=250;
+int max_distance=80;
+int delay_between=20000;
+int max_bright=120;
 
 void FC (int x, int y);
 void FC_double(int S1, int E1,int S2,int E2);
@@ -250,17 +250,17 @@ void loop() {
   if(d1<=max_distance){
     Serial.print("D1: ");
     Serial.println(d1);  
-    FC(1,3);
+    FC(1,17);
   }
   if(d2<=max_distance){
     Serial.print("D2: ");
     Serial.println(d2);  
-    FC_double(3,3,2,1); //Start1Up_shorter,End1Up,Start2Down_longer,End2Down
+    FC_double(13,17,12,1); //Start1Up_shorter,End1Up,Start2Down_longer,End2Down
   }  
   if(d3<=max_distance){
     Serial.print("D3: ");
     Serial.println(d3);  
-    FC(3,1);
+    FC(17,1);
   }
 //  /Serial.println("test5");
   
@@ -336,7 +336,9 @@ void FC_double (int S1, int E1,int S2,int E2)  //Start1Up_shorter,End1Up,Start2D
         dmx.update();
         delay2(Delay);
       }
-      if(j>=E1) j=0;else j++;
+      if(j<E1 && j!=0) j++;
+      else j=0;
+      
     }
     delay2(delay_between);
     j=S1;
@@ -349,7 +351,8 @@ void FC_double (int S1, int E1,int S2,int E2)  //Start1Up_shorter,End1Up,Start2D
         dmx.update();
         delay2(Delay);
       }
-      if(j>=E1) j=0;else j++;
+      if(j<E1 && j!=0) j++;
+      else j=0;
     }
   }
   else {
