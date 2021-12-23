@@ -1,3 +1,4 @@
+
 // - - - - -
 // ESPDMX - A Arduino library for sending and receiving DMX using the builtin serial hardware port.
 //
@@ -132,8 +133,9 @@ DMXESPSerial dmx;
 
 int Delay=0;
 int max_distance=80;
+int max_distance_d1=100;
 int delay_between=20000;
-int max_bright=120;
+int max_bright=150;
 
 void FC (int x, int y);
 void FC_double(int S1, int E1,int S2,int E2);
@@ -149,14 +151,14 @@ void setup() {
   pinMode(ECHO2, INPUT); 
   pinMode(TRIG3, OUTPUT); 
   pinMode(ECHO3, INPUT); 
-  delay2(3000);
+  
 
   Serial.println("starting...");
 
   dmx.init(24, 4);           // initialization for complete bus
 
   Serial.println("initialized...");
-  delay2(200);               // wait a while (not necessary)
+  
   for (int i = 0; i < 24; i++)
     {
       dmx.write(i, 0);
@@ -247,7 +249,7 @@ void loop() {
   int d1=ultr(ECHO1,TRIG1);
   int d2=ultr(ECHO2,TRIG2);
   int d3=ultr(ECHO3,TRIG3);
-  if(d1<=max_distance){
+  if(d1<=max_distance_d1){
     Serial.print("D1: ");
     Serial.println(d1);  
     FC(1,17);
@@ -261,6 +263,11 @@ void loop() {
     Serial.print("D3: ");
     Serial.println(d3);  
     FC(17,1);
+  }
+  if(d3>200 && d3<250){
+    Serial.print("D3: ");
+    Serial.println(d3);  
+    FC(18,20);
   }
 //  /Serial.println("test5");
   
@@ -281,7 +288,7 @@ void FC (int x, int y){ //Start,End
       {
         dmx.write(i, v);
         dmx.update();
-        delay2(Delay);
+        //delay2(Delay);
     
       }
     }
@@ -292,7 +299,7 @@ void FC (int x, int y){ //Start,End
       {
         dmx.write(i, v);
         dmx.update();
-        delay2(Delay);
+        //delay2(Delay);
     
       }
     }
@@ -304,7 +311,7 @@ void FC (int x, int y){ //Start,End
       {
         dmx.write(i, v);
         dmx.update();
-        delay2(Delay);
+        //delay2(Delay);
     
       }
     }
@@ -315,7 +322,7 @@ void FC (int x, int y){ //Start,End
       {
         dmx.write(i, v);
         dmx.update();
-        delay2(Delay);
+        //delay2(Delay);
     
       }
     }
@@ -334,7 +341,7 @@ void FC_double (int S1, int E1,int S2,int E2)  //Start1Up_shorter,End1Up,Start2D
         dmx.write(i, v);
         if(j!=0) dmx.write(j,v);
         dmx.update();
-        delay2(Delay);
+        //delay2(Delay);
       }
       if(j<E1 && j!=0) j++;
       else j=0;
@@ -349,7 +356,7 @@ void FC_double (int S1, int E1,int S2,int E2)  //Start1Up_shorter,End1Up,Start2D
         dmx.write(i, v);
         if(j!=0) dmx.write(j,v);
         dmx.update();
-        delay2(Delay);
+        //delay2(Delay);
       }
       if(j<E1 && j!=0) j++;
       else j=0;
