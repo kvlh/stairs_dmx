@@ -117,25 +117,24 @@ const char* serverIndex =
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // schody
 #include "ESPDMX.h"
-#define R1 15
-#define R2 5
 #define ECHO1 13
 #define TRIG1 12
 #define ECHO2 26
 #define TRIG2 25
 #define ECHO3 33
 #define TRIG3 32
-//#define ECHO4 21
-//#define TRIG4 19
-//#define ECHO5 23
-//#define TRIG5 22
+#define ECHO4 21
+#define TRIG4 19
+#define ECHO5 23
+#define TRIG5 22
 DMXESPSerial dmx;
 
 int Delay=0;
 int max_distance=80;
-int max_distance_d1=100;
+int max_distance_d1=90;
+int max_distance_d3=55;
 int delay_between=20000;
-int max_bright=150;
+int max_bright=120;
 
 void FC (int x, int y);
 void FC_double(int S1, int E1,int S2,int E2);
@@ -143,15 +142,16 @@ int ultr(int echo, int trig);
 
 void setup() {
   Serial.begin(115200);
-  pinMode(R1, INPUT);
-  pinMode(R2, INPUT);
-  pinMode(TRIG1, OUTPUT); 
+  pinMode(TRIG1, OUTPUT); //OUTPUT
   pinMode(ECHO1, INPUT); 
   pinMode(TRIG2, OUTPUT); 
   pinMode(ECHO2, INPUT); 
   pinMode(TRIG3, OUTPUT); 
   pinMode(ECHO3, INPUT); 
-  
+  pinMode(TRIG4, OUTPUT); 
+  pinMode(ECHO4, INPUT); 
+  pinMode(TRIG5, OUTPUT); 
+  pinMode(ECHO5, INPUT); 
 
   Serial.println("starting...");
 
@@ -243,12 +243,11 @@ void loop() {
   ///OTA///////////////////
   ///////////////////////////////////////////////////////////////////////////////////////
   server.handleClient();
-
-
   //other
   int d1=ultr(ECHO1,TRIG1);
   int d2=ultr(ECHO2,TRIG2);
   int d3=ultr(ECHO3,TRIG3);
+//  int d4=ultr(ECHO5,TRIG5);
   if(d1<=max_distance_d1){
     Serial.print("D1: ");
     Serial.println(d1);  
@@ -259,18 +258,13 @@ void loop() {
     Serial.println(d2);  
     FC_double(13,17,12,1); //Start1Up_shorter,End1Up,Start2Down_longer,End2Down
   }  
-  if(d3<=max_distance){
+  if(d3<=max_distance_d3){
     Serial.print("D3: ");
     Serial.println(d3);  
     FC(17,1);
   }
-  if(d3>200 && d3<250){
-    Serial.print("D3: ");
-    Serial.println(d3);  
-    FC(18,20);
-  }
-//  /Serial.println("test5");
-  
+
+
 
 }
 
@@ -280,6 +274,8 @@ void delay2(int x){
   while(millis() < time_now + x){
   }
 }
+
+
 void FC (int x, int y){ //Start,End
   if(x<y) {
     for (int i=x; i<=y;i++)
@@ -289,7 +285,6 @@ void FC (int x, int y){ //Start,End
         dmx.write(i, v);
         dmx.update();
         //delay2(Delay);
-    
       }
     }
     delay2(delay_between);
@@ -300,7 +295,6 @@ void FC (int x, int y){ //Start,End
         dmx.write(i, v);
         dmx.update();
         //delay2(Delay);
-    
       }
     }
   }
@@ -312,7 +306,6 @@ void FC (int x, int y){ //Start,End
         dmx.write(i, v);
         dmx.update();
         //delay2(Delay);
-    
       }
     }
     delay2(delay_between);
@@ -323,13 +316,12 @@ void FC (int x, int y){ //Start,End
         dmx.write(i, v);
         dmx.update();
         //delay2(Delay);
-    
       }
     }
   }
 }
 
-//  FC_double(3,3,2,1);
+
 void FC_double (int S1, int E1,int S2,int E2)  //Start1Up_shorter,End1Up,Start2Down_longer,End2Down
 { 
   if(S1<=E1 && S2>=E2 ){
@@ -345,7 +337,6 @@ void FC_double (int S1, int E1,int S2,int E2)  //Start1Up_shorter,End1Up,Start2D
       }
       if(j<E1 && j!=0) j++;
       else j=0;
-      
     }
     delay2(delay_between);
     j=S1;
@@ -364,12 +355,8 @@ void FC_double (int S1, int E1,int S2,int E2)  //Start1Up_shorter,End1Up,Start2D
   }
   else {
     Serial.print("error schody sie nie zgadzaja");
-
   }
 }
-
-
-
 
 
 int ultr(int echo, int trig){
@@ -386,7 +373,5 @@ int ultr(int echo, int trig){
   // Calculating the distance
   distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
   // Displays the distance on the Serial Monitor
-
-//  Serial.println(distance1);
   return distance;
 }
